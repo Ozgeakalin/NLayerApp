@@ -27,9 +27,8 @@ namespace NLayer.Web.Controllers
 
         public async Task<IActionResult> Save()
         {
-            var categories = await _categoryService.GetAllAsync();
-            var categoriesDto = _mapper.Map<List<CategoryDto>>(categories.ToList());
-            ViewBag.categories = new SelectList(categoriesDto, "Id", "Name");
+
+            ViewBag.categories = Task.Run(async () => await AddCategoryListAsync()).Result;
             return View();
         }
         [HttpPost]
@@ -41,11 +40,53 @@ namespace NLayer.Web.Controllers
                 await _services.AddAsync(product);
                 return RedirectToAction(nameof(Index));
             }
-            var categories = await _categoryService.GetAllAsync();
-            var categoriesDto = _mapper.Map<List<CategoryDto>>(categories.ToList());
-            ViewBag.categories = new SelectList(categoriesDto, "Id", "Name");
+            ViewBag.categories = Task.Run(async () => await AddCategoryListAsync()).Result;
             return View();
 
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Update(int id)
+        {
+            if (await _services.AnyAsync(x => x.Id == id))
+            {
+                var product = await _services.GetByIdAsync(id);
+                var productDto = _mapper.Map<ProductDto>(product);
+                ViewBag.categories = Task.Run(async () => await AddCategoryListAsync(productDto.CategoryId)).Result;
+                return View(productDto);
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Update(ProductDto productDto)
+        {
+            if (ModelState.IsValid)
+            {
+                await _services.UpdateAsync(_mapper.Map<Product>(productDto));
+                return RedirectToAction("Index");
+            }
+            ViewBag.categories = Task.Run(async () => await AddCategoryListAsync(productDto.CategoryId)).Result;
+
+            return View(productDto);
+        }
+
+        public  async Task< List<SelectListItem>> AddCategoryListAsync()
+        {
+            var categories = await _categoryService.GetAllAsync();
+            var categoriesDto = _mapper.Map<List<CategoryDto>>(categories.ToList());
+            List<SelectListItem> items = new SelectList(categoriesDto, "Id", "Name").ToList();
+            items.Insert(0, (new SelectListItem { Text = "Select one", Value = "0" }));
+            return items;
+        }
+        public async Task<List<SelectListItem>> AddCategoryListAsync(int categoryID)
+        {
+            var categories = await _categoryService.GetAllAsync();
+            var categoriesDto = _mapper.Map<List<CategoryDto>>(categories.ToList());
+            List<SelectListItem> items = new SelectList(categoriesDto, "Id", "Name",categoryID).ToList();
+            items.Insert(0, (new SelectListItem { Text = "Select one", Value = "0" }));
+            return items;
         }
     }
 }

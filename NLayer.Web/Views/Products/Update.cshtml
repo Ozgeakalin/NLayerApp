@@ -1,41 +1,43 @@
-﻿@{
-    ViewData["Title"] = "Save";
+﻿
+@{
+    ViewData["Title"] = "Update";
 }
 @model ProductDto
-<h1>Save Product</h1>
+<h1>Update Product</h1>
+
 <div class="row">
     <div class="col md-6">
-        <form asp-action="Save" method="post" asp-controller="Products">
+        <form asp-action="Update" method="post" asp-controller="Products">
+            <input type="hidden" asp-for="Id"/>
             <div class="form-group">
-                <label asp-for="Name"></label>
-                <input asp-for="Name" class="form-control" />
+                <label asp-for="Name" ></label>
+                <input asp-for="Name" value="@Model.Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="Stock"></label>
-                <input asp-for="Stock" class="form-control" />
+                <input asp-for="Stock" value="@Model.Stock" class="form-control" />
                 <span asp-validation-for="Stock" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="Price"></label>
-                <input asp-for="Price" class="form-control" />
+                <input asp-for="Price" value="@Model.Price" class="form-control" />
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="CategoryId"></label>
-                <select asp-for="CategoryId" data-placeholder="Choose a Category" asp-items="ViewBag.categories" class="form-control"></select>
+                <select asp-for="CategoryId" asp-items="@ViewBag.categories" data-placeholder="Choose a Category"  class="form-control"></select>
                 <span asp-validation-for="CategoryId" class="text-danger"></span>
 
             </div>
 
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Update" class="btn btn-primary" />
             </div>
 
         </form>
     </div>
 </div>
-
