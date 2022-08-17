@@ -44,7 +44,7 @@ namespace NLayer.Web.Controllers
             return View();
 
         }
-
+        [ServiceFilter(typeof(NotFoundFilter<Product>))]
         [HttpGet]
         public async Task<IActionResult> Update(int id)
         {
@@ -72,7 +72,19 @@ namespace NLayer.Web.Controllers
             return View(productDto);
         }
 
-        public  async Task< List<SelectListItem>> AddCategoryListAsync()
+        public async Task<IActionResult> Remove(int id)
+        {
+            if (await _services.AnyAsync(x => x.Id == id))
+            {
+                await _services.RemoveAsync(await _services.GetByIdAsync(id));
+            }
+
+            return RedirectToAction("Index");
+
+        }
+
+
+        public async Task<List<SelectListItem>> AddCategoryListAsync()
         {
             var categories = await _categoryService.GetAllAsync();
             var categoriesDto = _mapper.Map<List<CategoryDto>>(categories.ToList());
@@ -84,7 +96,7 @@ namespace NLayer.Web.Controllers
         {
             var categories = await _categoryService.GetAllAsync();
             var categoriesDto = _mapper.Map<List<CategoryDto>>(categories.ToList());
-            List<SelectListItem> items = new SelectList(categoriesDto, "Id", "Name",categoryID).ToList();
+            List<SelectListItem> items = new SelectList(categoriesDto, "Id", "Name", categoryID).ToList();
             items.Insert(0, (new SelectListItem { Text = "Select one", Value = "0" }));
             return items;
         }
